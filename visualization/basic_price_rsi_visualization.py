@@ -29,7 +29,7 @@ class BasicPriceWithRsiVisualization(Visualization):
         self.price_trace_list.append(trace)
         
         #메인 피겨 갱신
-        self.__main_figure = self.__draw_subplots(self.price_trace_list,[rsi_trace])
+        self.__main_figure = self.__draw_subplots(self.price_trace_list, self.rsi_trace_lsit)
         
     def get_figure(self):
         return self.__main_figure
@@ -64,15 +64,20 @@ class BasicPriceWithRsiVisualization(Visualization):
 
         ma_60_trace = go.Scatter(x=self.__df['timestamp_kst'], y=self.__df['ma_60'], mode='lines', name='MA_60', line=dict(color='black'))
         
+        ma_200_trace = go.Scatter(x=self.__df['timestamp_kst'], y=self.__df['ma_200'], mode='lines', name='MA_200', line=dict(color='gray'))
+
+        
         rsi_trace = go.Scatter(x=self.__df['timestamp_kst'], y=self.__df['RSI'], mode='lines', name='RSI', line=dict(color='blue'))
+        self.rsi_trace_lsit = [rsi_trace]
         
         self.price_trace_list.append(main_trace)
         self.price_trace_list.append(high_point_trace)
         self.price_trace_list.append(low_point_trace)
         self.price_trace_list.append(ma_20_trace)
         self.price_trace_list.append(ma_60_trace)
+        self.price_trace_list.append(ma_200_trace)
         
-        main_figure = self.__draw_subplots(self.price_trace_list,[rsi_trace])
+        main_figure = self.__draw_subplots(self.price_trace_list, self.rsi_trace_lsit)
         
         self.__main_figure = main_figure
    
@@ -100,6 +105,53 @@ class BasicPriceWithRsiVisualization(Visualization):
             fig.add_trace(i, row=2, col=1)
             fig.add_hline(y=70, line_dash="dash", line_color="red", annotation_text="Overbought (70)", row=2, col=1)
             fig.add_hline(y=30, line_dash="dash", line_color="green", annotation_text="Oversold (30)", row=2, col=1)
+
+        self.__highlight_aligned_in_order_sections(fig)
             
             
         return fig
+
+    def __highlight_aligned_in_order_sections(self, fig):
+        if 'aligned_in_order' not in self.__df.columns:
+            return
+
+        timestamps = list(self.__df['timestamp_kst'])
+        raw_aligned_values = self.__df['aligned_in_order'].fillna(False).tolist()
+
+        aligned_values = []
+        true_string_values = {"true", "1", "t", "y", "yes"}
+        for value in raw_aligned_values:
+            if isinstance(value, bool):
+                aligned_values.append(value)
+            elif isinstance(value, (int, float)):
+                aligned_values.append(value == 1)
+            elif isinstance(value, str):
+                aligned_values.append(value.strip().lower() in true_string_values)
+            else:
+                aligned_values.append(False)
+
+        start_idx = None
+        for idx, is_aligned in enumerate(aligned_values):
+            if is_aligned and start_idx is None:
+                start_idx = idx
+            elif not is_aligned and start_idx is not None:
+                fig.add_vrect(
+                    x0=timestamps[start_idx],
+                    x1=timestamps[idx - 1],
+                    fillcolor="rgba(255, 165, 0, 0.20)",
+                    line_width=0,
+                    row=1,
+                    col=1,
+                )
+                start_idx = None
+
+        if start_idx is not None and len(timestamps) > 0:
+            fig.add_vrect(
+                x0=timestamps[start_idx],
+                x1=timestamps[-1],
+                fillcolor="rgba(255, 165, 0, 0.20)",
+                line_width=0,
+                row=1,
+                col=1,
+            )
+
