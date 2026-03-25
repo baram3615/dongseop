@@ -16,8 +16,9 @@ class RSIProcessing(DataProcessingStrategy):
         gain = np.where(delta > 0, delta, 0)  # 상승분
         loss = np.where(delta < 0, -delta, 0)  # 하락분
     
-        avg_gain = pd.Series(gain).rolling(window=period, min_periods=1).mean()
-        avg_loss = pd.Series(loss).rolling(window=period, min_periods=1).mean()
+        # min_periods=period로 설정하여 정확한 RSI 계산 (처음 period개까지는 NaN)
+        avg_gain = pd.Series(gain).rolling(window=period, min_periods=period).mean()
+        avg_loss = pd.Series(loss).rolling(window=period, min_periods=period).mean()
         
         rs = avg_gain / (avg_loss + 1e-10)  # 0으로 나누는 오류 방지
         rsi = 100 - (100 / (1 + rs))

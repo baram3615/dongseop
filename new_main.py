@@ -134,7 +134,7 @@ for idx, one_coin in enumerate(tickers):
     #출력
     draw_instance = BasicPriceWithRsiVisualization()
     draw_instance.set_data(upbit.data, upbit.high_point_df, upbit.low_point_df)
-    draw_instance.make_figure()
+    draw_instance.make_figure(title=one_coin)
     
     figure = draw_instance.get_figure()
     

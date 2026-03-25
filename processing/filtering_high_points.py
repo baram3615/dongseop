@@ -16,7 +16,8 @@ class GetHighPoints(DataProcessingStrategy):
         
     #df와 타겟 컬럼명을 받아서 해당 %이상의 값만 필터링하는 함수
     def __apply_threshold_with_normalizing_for_high_value(self, target_df, target_column, threshold):
-    
+        target_df = target_df.copy()
+
         #min-max 정규화
         target_df['normalized_value_high'] = (target_df[target_column] - target_df[target_column].min()) / (target_df[target_column].max() - target_df[target_column].min())
         
@@ -25,7 +26,7 @@ class GetHighPoints(DataProcessingStrategy):
         
         #상위 5%에 포함되는 애들을 별도로 선언
     
-        df_calculated = target_df[target_df['normalized_value_high'] >= threshold]
+        df_calculated = target_df.loc[target_df['normalized_value_high'] >= threshold].copy()
         df_calculated.loc[df_calculated['normalized_value_high'] >= threshold, 'origin_high_score'] = df_calculated[target_column]
         #그래프를 그리기 위한 수단을 벌써 넣으면 안됨
         df_calculated.loc[df_calculated['normalized_value_high'] >= threshold, 'high_for_graph'] = df_calculated['high']
@@ -36,7 +37,7 @@ class GetHighPoints(DataProcessingStrategy):
         return df_calculated
     
     def __merge_high_score_df(self, df_origin, base_score):
-        df_calculated=df_origin.loc[df_origin['high_score'] > base_score]
+        df_calculated = df_origin.loc[df_origin['high_score'] > base_score].copy()
         df_calculated.loc[df_calculated['high_score'] > base_score, 'origin_score'] = df_calculated['high_score']
         df_calculated.loc[df_calculated['high_score'] > base_score, 'high_score'] = df_calculated['high']
     

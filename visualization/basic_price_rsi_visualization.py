@@ -11,13 +11,16 @@ class BasicPriceWithRsiVisualization(Visualization):
     def __init__(self):
         self.price_trace_list = []
         self.rsi_trace_lsit = []
+        self.figure_title = 'Candlestick Chart'
         
     def set_data(self, df, high_points_df, low_points_df):
         self.__df = df
         self.__high_points_df = high_points_df
         self.__low_points_df = low_points_df
     
-    def make_figure(self):
+    def make_figure(self, title=None):
+        if title:
+            self.figure_title = title
         self.__get_base_figure()
     
     def visualize(self):
@@ -89,7 +92,7 @@ class BasicPriceWithRsiVisualization(Visualization):
                         subplot_titles=("가격 차트", "RSI (14)"))
         
         fig.update_layout(
-        title='Candlestick Chart',
+        title=self.figure_title,
         xaxis_title='Date',
         yaxis_title='Price',
         xaxis_rangeslider_visible=False,
