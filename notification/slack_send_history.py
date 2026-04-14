@@ -105,12 +105,23 @@ def should_send_slack_message(history: dict, coin_name: str, dark_yellow_group_s
     return current_intervals != previous_intervals, format_dark_yellow_intervals_text(current_intervals), previous_lengths
 
 
-def update_slack_send_history(history: dict, coin_name: str, dark_yellow_group_start_end_list: list, timestamp_series=None) -> dict:
+def update_slack_send_history(history: dict, coin_name: str, dark_yellow_group_start_end_list: list, is_above_weekly_ma20=None, timestamp_series=None) -> dict:
     dark_yellow_intervals = get_dark_yellow_intervals(dark_yellow_group_start_end_list, timestamp_series)
+    # 문자열(Y/N/N/A)로 이미 넘어온 경우 그대로 기록, 아니면 변환
+    if isinstance(is_above_weekly_ma20, str):
+        is_above_weekly_ma20_str = is_above_weekly_ma20
+    elif is_above_weekly_ma20 is True:
+        is_above_weekly_ma20_str = 'Y'
+    elif is_above_weekly_ma20 is False:
+        is_above_weekly_ma20_str = 'N'
+    else:
+        is_above_weekly_ma20_str = 'N/A'
+
     history[coin_name] = {
         "dark_yellow_intervals": dark_yellow_intervals,
         "dark_yellow_lengths": [one_interval["length"] for one_interval in dark_yellow_intervals],
         "last_sent_at": datetime.now().isoformat(timespec="seconds"),
+        "is_above_weekly_ma20": is_above_weekly_ma20_str,
     }
     return history
 
