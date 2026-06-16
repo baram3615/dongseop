@@ -1,0 +1,39 @@
+//@version=5
+indicator("Trade Marker LONG/SHORT", overlay=true)
+
+// === 배열 ===
+var longTimes  = array.new_int()
+var shortTimes = array.new_int()
+
+// === 초기 데이터 ===
+if barstate.isfirst
+    // 🔺 Long (빨간 ↑)
+    array.push(longTimes, timestamp("GMT+9", 2026, 6, 16, 12, 0))
+    array.push(longTimes, timestamp("GMT+9", 2026, 6, 16, 15, 30))
+
+    // 🔻 Short (초록 ↓)
+    array.push(shortTimes, timestamp("GMT+9", 2026, 6, 16, 9, 15))
+
+// === 조건 ===
+isLong  = false
+isShort = false
+
+// Long 체크
+for i = 0 to array.size(longTimes) - 1
+    t = array.get(longTimes, i)
+    if (time <= t) and (t < time + timeframe.multiplier * 60 * 1000)
+        isLong := true
+
+// Short 체크
+for i = 0 to array.size(shortTimes) - 1
+    t = array.get(shortTimes, i)
+    if (time <= t) and (t < time + timeframe.multiplier * 60 * 1000)
+        isShort := true
+
+// === 출력 ===
+
+// 🔺 Long (빨간 위 화살표)
+plotshape(isLong ? low : na, location=location.absolute, style=shape.triangleup, size=size.small, color=color.red)
+
+// 🔻 Short (초록 아래 화살표)
+plotshape(isShort ? high : na, location=location.absolute, style=shape.triangledown, size=size.small, color=color.green)
