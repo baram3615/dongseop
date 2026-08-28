@@ -1,1 +1,2 @@
-테스트
+1. c:\\Users\\baram\\trading_env\\Scripts\\python.exe slack_similarity_api.py   
+2. ngrok http 8080
